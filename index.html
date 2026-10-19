@@ -10,8 +10,8 @@
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),can=$('canvas'),ctx=can.getContext('2d');if(!ctx){$('status').textContent='Canvas no disponible';return}
-const initial=()=>({shots:[['01 · Gancho',0,1,-1,2,-10,0,-1.2,-12,52],['02 · Pie subiendo',1,2,0,-2.1,-14,0,-2,-11,48],['03 · Barandilla',2,3,2,-1,-10,0,-1.5,-10,50],['04 · Sale del metro',3,5,-3,2,-3,0,-1,-8,38],['05 · Mira atrás',5,7,0,1,-4,0,-2,-11,46],['06 · Huye por la calle',7,9,-4,2,1,0,1,1,42],['07 · Descubre taxi',9,12,-3,2,4,3,1,8,42]].map(a=>({name:a[0],a:a[1],b:a[2],pos:a.slice(3,6),target:a.slice(6,9),lens:a[9]})),route:[[-14,-3.6],[-13,-3.2],[-12,-2.8],[-11,-2.4],[-10,-2],[-9,-1.6],[-8,-1.2],[-7,-.8],[-6,-.4],[-5,0],[1,0],[8,0]]});
-let data=initial();try{const v=JSON.parse(localStorage.getItem('noexit-previs-v3'));if(v?.shots?.length===7)data=v}catch{}
+const initial=()=>({shots:[['01 · Gancho',0,1,-0.8,-1.1,-10.5,0,-2.0,-13.3,68],['02 · Pie subiendo',1,2,-1.1,-3.4,-12.7,0,-2.6,-11.4,78],['03 · Barandilla',2,3,3,-1.7,-9.5,0,-1.8,-9.8,47],['04 · Sale del metro',3,5,-2.1,1.7,-3.8,0,-1.2,-7.3,47],['05 · Mira atrás',5,7,2,2,-1.2,0,-.5,-5.5,48],['06 · Huye por la calle',7,9,-3.8,2.6,5,0,1,0,39],['07 · Descubre taxi',9,12,-2.4,1.9,11,2.8,.9,8,44]].map(a=>({name:a[0],a:a[1],b:a[2],pos:a.slice(3,6),target:a.slice(6,9),lens:a[9]})),route:[[-14,-3.6],[-13,-3.2],[-12,-2.8],[-11,-2.4],[-10,-2],[-9,-1.6],[-8,-1.2],[-7,-.8],[-6,-.4],[-5,0],[1,0],[8,0]]});
+let data=initial();try{const v=JSON.parse(localStorage.getItem('noexit-previs-v4'));if(v?.shots?.length===7)data=v}catch{}
 let time=0,sel=0,mode='cam',playing=false,last=0,width=1,height=1;
 const interp=(a,b,t)=>a+(b-a)*t,ground=z=>z<=-14?-3.6:z>=-5?0:(z+5)*.4;
 function actor(){let z=time<5?interp(-14,-5,time/5):interp(-5,8,(time-5)/7);return {x:0,z,y:ground(z)}}
@@ -22,13 +22,22 @@ function box(x,y,z,w,h,d,c){poly([[x-w/2,y,z-d/2],[x+w/2,y,z-d/2],[x+w/2,y+h,z-d
 function line(a,b,col='#83929a',sw=2){let x=project(a),y=project(b);if(!x||!y)return;ctx.beginPath();ctx.moveTo(...x);ctx.lineTo(...y);ctx.strokeStyle=col;ctx.lineWidth=sw;ctx.stroke()}
 function text(s,p){const x=project(p);if(!x)return;ctx.fillStyle='#34444e';ctx.font='bold 14px system-ui';ctx.textAlign='center';ctx.fillText(s,x[0],x[1])}
 function draw(){let w=can.clientWidth,h=can.clientHeight,dpr=Math.min(devicePixelRatio||1,2);if(w!==width||h!==height){width=w;height=h;can.width=Math.round(w*dpr);can.height=Math.round(h*dpr)}ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='#e1e5e6';ctx.fillRect(0,0,width,height);if(mode==='cam'){ctx.fillStyle='#343b44';ctx.fillRect(0,0,width,height*.24)}
-box(0,-.15,7,14,.14,28,'#e8e9e9');for(let i=0;i<18;i++){let z=-13.75+i*.5;box(0,ground(z)-.16,z,4.5,.15,.50,'#edf0f1')}
+box(0,-.22,7,14,.18,28,'#e8e9e9');for(let i=0;i<18;i++){let z=-13.75+i*.5;box(0,ground(z)-.18,z,4.7,.18,.52,i%2?'#f4f5f5':'#fff')}
 for(let x of [-2.4,2.4]){box(x,-3.6,-9.5,.15,3.6,9,'#d3d8d9');line([x,-2.6,-14],[x,1,-5])}
 box(0,2.4,-5.2,6.5,.65,.2,'#fafafa');for(let i=0;i<7;i++){box(-2.8+i*.85,0,-19-i*.4,.5,3+i*.6,.6,'#cdd3d8')}
 for(let j=0;j<5;j++){box(j%2?8:-8,0,j*5-2,2.5,4,3,'#d0d5d8')}
 box(2.8,.2,8,2.4,.9,4.2,'#c2cbd0');box(2.8,1.1,8,1.9,.6,2.7,'#f9fafa');box(2.8,1.75,8,.8,.2,.6,'#fff');
-let p=actor(),swing=Math.sin(time*16)*.15;box(p.x,p.y+.5,p.z,.52,.9,.4,'#fcfcfc');box(p.x,p.y+1.43,p.z,.40,.42,.4,'#fff');box(-.16,p.y+.10+swing,p.z+.12,.18,.58,.22,'#e7e7e7');box(.16,p.y+.1-swing,p.z-.12,.18,.58,.22,'#e7e7e7');
-text('Sagrada Família',[0,2.85,-5]);text('TAXI',[2.8,2.15,8]);$('info').textContent=data.shots[sel].name+' · '+time.toFixed(1)+' s'+(mode==='map'?' · mapa':'')}
+let p=actor(),swing=Math.sin(time*15)*.19;
+box(p.x,p.y+.75,p.z,.67,.73,.42,'#fdfdfd');
+box(p.x,p.y+1.54,p.z,.42,.41,.42,'#fefefe');
+box(p.x-.25,p.y+.20+swing,p.z-.12,.20,.64,.26,'#d5dce0');
+box(p.x+.25,p.y+.20-swing,p.z+.12,.20,.64,.26,'#d5dce0');
+box(p.x-.48,p.y+.68,p.z-.05,.18,.7,.24,'#e6eaed');
+box(p.x+.48,p.y+.68,p.z+.05,.18,.7,.24,'#e6eaed');
+let head=project([p.x,p.y+1.7,p.z]);if(head){ctx.beginPath();ctx.arc(head[0],head[1],mode==='map'?6:Math.min(30,Math.max(6,180/(head[2]||10))),0,Math.PI*2);ctx.strokeStyle='#5a6973';ctx.lineWidth=2;ctx.stroke()}
+text('Sagrada Família',[0,2.85,-5]);text('TAXI',[2.8,2.15,8]);
+if(mode==='cam'){ctx.save();ctx.fillStyle='rgba(255,255,255,.92)';ctx.fillRect(12,56,Math.min(width-24,252),47);ctx.fillStyle='#253b49';ctx.font='bold 17px system-ui';ctx.textAlign='left';ctx.fillText('M  Sagrada Família',24,85);ctx.restore()}
+else{ctx.fillStyle='#31424c';ctx.font='bold 13px system-ui';ctx.fillText('METRO ↑ CALLE → TAXI',18,32)}$('info').textContent=data.shots[sel].name+' · '+time.toFixed(1)+' s'+(mode==='map'?' · mapa':'')}
 function redraw(){let index=shotIndex();if(sel!==index){sel=index;controls()}document.querySelectorAll('[data-s]').forEach(x=>x.classList.toggle('active',+x.dataset.s===sel));$('clock').textContent=time.toFixed(1)+' / 12 s';$('seek').value=time;draw()}
 function save(){try{localStorage.setItem('noexit-previs-v3',JSON.stringify(data));$('status').textContent='Guardado correctamente'}catch(e){$('status').textContent='No se pudo guardar: exporta JSON'}}
 function controls(){const div=$('controls');div.replaceChildren();const s=data.shots[sel];[['Objetivo (mm)','lens',null],['Cámara X','pos',0],['Cámara Y','pos',1],['Cámara Z','pos',2],['Mirada X','target',0],['Mirada Y','target',1],['Mirada Z','target',2]].forEach(([name,k,i])=>{let v=i===null?s[k]:s[k][i],label=document.createElement('label'),r=document.createElement('input');label.textContent=name+' · '+v;r.type='range';r.min=k==='lens'?20:-20;r.max=k==='lens'?105:20;r.step=k==='lens'?1:.1;r.value=v;r.oninput=()=>{if(i===null)s[k]=+r.value;else s[k][i]=+r.value;label.textContent=name+' · '+r.value;save();draw()};div.append(label,r)})}
